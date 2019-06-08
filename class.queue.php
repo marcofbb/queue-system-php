@@ -47,7 +47,7 @@ class queue_admin {
 						status INTEGER)");
 	}
 	
-	public function put($command, $id = null){
+	public function enqueue($command, $id = null){
 		if(empty($id)) $id = md5($command);
 		$stmt = $this->db->prepare("SELECT * FROM queue WHERE id = :id LIMIT 1");
 		$stmt->bindValue(':id', $id);
