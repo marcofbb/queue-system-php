@@ -6,9 +6,9 @@ $cola = new queue_admin();
 if(isset($_GET['do']) and !empty($_GET['do'])){
 	$do = $_GET['do'];
 	if($do == 'add-demo-process1'){
-		$cola->put('C:\xampp\php\php.exe '.__DIR__.'/exec/write_time_in_txt.php', time());
+		$cola->enqueue('C:\xampp\php\php.exe '.__DIR__.'/exec/write_time_in_txt.php', time());
 	} elseif($do == 'add-demo-process2'){
-		$cola->put('C:\xampp\php\php.exe '.__DIR__.'/exec/wait_30s.php', time());
+		$cola->enqueue('C:\xampp\php\php.exe '.__DIR__.'/exec/wait_30s.php', time());
 	} elseif($do == 'exec-one-queue') {
 		$cola->process_queue();
 	} elseif($do == 'delete-all-process-finish'){

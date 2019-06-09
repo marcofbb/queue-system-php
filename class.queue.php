@@ -1,4 +1,15 @@
-<?php 
+<?php
+
+function conectarDB(){
+	$dbhost = 'localhost';
+	$dbuser = 'root';
+	$dbpass = '';
+	$dbbase = 'p2pdrive';
+	$link = mysqli_connect($dbhost,$dbuser,$dbpass);
+			mysqli_select_db($link,$dbbase);
+			
+	return $link;
+}
 
 class queue_admin {
 		
@@ -31,50 +42,42 @@ class queue_admin {
 	/*
 		Link DB
 	*/
-	private $db;
+	private $linkdb;
 	
 	function __construct (){
-		// Creo la base de datos para gestionar los procesos 
-		$this->db = new PDO('sqlite:'.$this->file_db);
-		$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-		$this->db->exec("CREATE TABLE IF NOT EXISTS queue (
-						id TEXT NOT NULL UNIQUE,
-						command TEXT, 
-						message TEXT, 
-						time_add_queue INTEGER,
-						time_start_process INTEGER,
-						time_finish_process INTEGER,
-						status INTEGER)");
+		//
+		$this->linkdb = conectarDB();
+		mysqli_query($this->linkdb, 'CREATE TABLE IF NOT EXISTS `queue` (
+  `id` int(11) NOT NULL,
+  `command` text,
+  `message` text,
+  `time_add_queue` int(11),
+  `time_start_process` int(11),
+  `time_finish_process` int(11),
+  `status` int(11),
+  UNIQUE KEY `id` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;');
 	}
 	
 	public function enqueue($command, $id = null){
 		if(empty($id)) $id = md5($command);
-		$stmt = $this->db->prepare("SELECT * FROM queue WHERE id = :id LIMIT 1");
-		$stmt->bindValue(':id', $id);
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
-		$stmt->execute();
-		if(!empty($stmt->fetch())) return false;
-		
-		$stmt = $this->db->prepare("INSERT INTO queue (id, command, message, time_add_queue, time_start_process, time_finish_process, status) VALUES (:id, :command, :message, :time_add_queue, :time_start_process, :time_finish_process, :status)");
-		
-		$stmt->bindValue(':id', $id);
-		$stmt->bindValue(':command', $command);
-		$stmt->bindValue(':message', "");
-		$stmt->bindValue(':time_add_queue', time());
-		$stmt->bindValue(':time_start_process', 0);
-		$stmt->bindValue(':time_finish_process', 0);
-		$stmt->bindValue(':status', 1);
-		$stmt->execute();
-		
+		$id = mysqli_real_escape_string($this->linkdb,$id);
+		$command = mysqli_real_escape_string($this->linkdb,$command);
+		$sql = "SELECT * FROM queue WHERE id = '{$id}' LIMIT 1";
+		$sql = mysqli_query($this->linkdb, $sql);
+		$row = mysqli_fetch_assoc($sql);
+		if(!empty($row)) return false;
+		$time = time();
+		$sql = "INSERT INTO queue (id, command, time_add_queue, time_start_process, time_finish_process, status) VALUES ('{$id}', '{$command}', '{$time}', 0, 0, 1)";
+		mysqli_query($this->linkdb, $sql);
 		return $id;
 	}
 	
 	public function run_job($id){
-		$stmt = $this->db->prepare("SELECT * FROM queue WHERE id = :id and status = '1' LIMIT 1");
-		$stmt->bindValue(':id', $id);
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
-		$stmt->execute();
-		$result = $stmt->fetch();
+		$id = mysqli_real_escape_string($this->linkdb,$id);
+		$sql = "SELECT * FROM queue WHERE id = '{$id}' and status = '1' LIMIT 1";
+		$sql = mysqli_query($this->linkdb, $sql);
+		$result = mysqli_fetch_assoc($sql);
 		if(empty($result)) return false;
 		$this->mark_as_process($id);
 		$output = $this->exec_command($result['command']);
@@ -84,34 +87,30 @@ class queue_admin {
 	}
 	
 	public function count_queue_processing(){
-		$stmt = $this->db->prepare("SELECT count(*) as total FROM queue WHERE status = '2'");
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
-		$stmt->execute();
-		$result = $stmt->fetch();
+		$sql = "SELECT count(*) as total FROM queue WHERE status = '2'";
+		$sql = mysqli_query($this->linkdb, $sql);
+		$result = mysqli_fetch_assoc($sql);
 		return $result['total'];
 	}
 	
 	public function count_queue_pending(){
-		$stmt = $this->db->prepare("SELECT count(*) as total FROM queue WHERE status = '1'");
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
-		$stmt->execute();
-		$result = $stmt->fetch();
+		$sql = "SELECT count(*) as total FROM queue WHERE status = '1'";
+		$sql = mysqli_query($this->linkdb, $sql);
+		$result = mysqli_fetch_assoc($sql);
 		return $result['total'];
 	}
 	
 	public function count_queue_finish(){
-		$stmt = $this->db->prepare("SELECT count(*) as total FROM queue WHERE status = '3'");
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
-		$stmt->execute();
-		$result = $stmt->fetch();
+		$sql = "SELECT count(*) as total FROM queue WHERE status = '3'";
+		$sql = mysqli_query($this->linkdb, $sql);
+		$result = mysqli_fetch_assoc($sql);
 		return $result['total'];
 	}
 	
 	public function count_queue_total(){
-		$stmt = $this->db->prepare("SELECT count(*) as total FROM queue");
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
-		$stmt->execute();
-		$result = $stmt->fetch();
+		$sql = "SELECT count(*) as total FROM queue";
+		$sql = mysqli_query($this->linkdb, $sql);
+		$result = mysqli_fetch_assoc($sql);
 		return $result['total'];
 	}
 	
@@ -122,19 +121,18 @@ class queue_admin {
 	}
 	
 	public function get_queue_db(){
-		$stmt = $this->db->prepare("SELECT * FROM queue");
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
-		$stmt->execute();
+		$sql = "SELECT * FROM queue";
+		$sql = mysqli_query($this->linkdb, $sql);
 		$data = array();
-		while($row = $stmt->fetch()){
+		while($row = mysqli_fetch_assoc($sql)){
 			$data[] = $row;
 		}
 		return $data;
 	}
 	
 	public function delete_process_finish(){
-		$stmt = $this->db->prepare("DELETE FROM queue WHERE status = '3'");
-		$stmt->execute();
+		$sql = "DELETE FROM queue WHERE status = '3'";
+		$sql = mysqli_query($this->linkdb, $sql);
 	}
 	
 	public function is_dispatcher_run(){
@@ -151,10 +149,9 @@ class queue_admin {
 	}
 	
 	private function process_next(){
-		$stmt = $this->db->prepare("SELECT * FROM queue WHERE status = '1' LIMIT 1");
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
-		$stmt->execute();
-		$result = $stmt->fetch();
+		$sql = "SELECT * FROM queue WHERE status = '1' LIMIT 1";
+		$sql = mysqli_query($this->linkdb, $sql);
+		$result = mysqli_fetch_assoc($sql);
 		if(empty($result)) return;
 		$this->process_job($result['id']);
 	}
@@ -175,35 +172,31 @@ class queue_admin {
 	}
 	
 	private function set_start_time($id){
-		$stmt = $this->db->prepare("UPDATE queue SET time_start_process = :time_start_process WHERE id = :id");
-		$stmt->bindValue(':time_start_process', time());
-		$stmt->bindValue(':id', $id);
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
-		$stmt->execute();
+		$id = mysqli_real_escape_string($this->linkdb,$id);
+		$time = time();
+		$sql = "UPDATE queue SET time_start_process = '{$time}' WHERE id = '{$id}' LIMIT 1";
+		mysqli_query($this->linkdb, $sql);
 	}
 	
 	private function set_finish_time($id){
-		$stmt = $this->db->prepare("UPDATE queue SET time_finish_process = :time_finish_process WHERE id = :id");
-		$stmt->bindValue(':time_finish_process', time());
-		$stmt->bindValue(':id', $id);
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
-		$stmt->execute();
+		$id = mysqli_real_escape_string($this->linkdb,$id);
+		$time = time();
+		$sql = "UPDATE queue SET time_finish_process = '{$time}' WHERE id = '{$id}' LIMIT 1";
+		mysqli_query($this->linkdb, $sql);
 	}
 	
 	private function set_status($id, $status){
-		$stmt = $this->db->prepare("UPDATE queue SET status = :status WHERE id = :id");
-		$stmt->bindValue(':status', $status);
-		$stmt->bindValue(':id', $id);
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
-		$stmt->execute();
+		$id = mysqli_real_escape_string($this->linkdb,$id);
+		$status = mysqli_real_escape_string($this->linkdb, $status);
+		$sql = "UPDATE queue SET status = '{$status}' WHERE id = '{$id}' LIMIT 1";
+		mysqli_query($this->linkdb, $sql);
 	}
 	
 	private function set_message($id, $output){
-		$stmt = $this->db->prepare("UPDATE queue SET message = :message WHERE id = :id");
-		$stmt->bindValue(':message', $output);
-		$stmt->bindValue(':id', $id);
-		$stmt->setFetchMode(PDO::FETCH_ASSOC);
-		$stmt->execute();
+		$id = mysqli_real_escape_string($this->linkdb,$id);
+		$output = mysqli_real_escape_string($this->linkdb, $output);
+		$sql = "UPDATE queue SET message = '{$output}' WHERE id = '{$id}' LIMIT 1";
+		mysqli_query($this->linkdb, $sql);
 	}
 	
 	private function execInBackground($cmd) {
