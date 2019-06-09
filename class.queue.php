@@ -48,7 +48,7 @@ class queue_admin {
 		//
 		$this->linkdb = conectarDB();
 		mysqli_query($this->linkdb, 'CREATE TABLE IF NOT EXISTS `queue` (
-  `id` int(11) NOT NULL,
+  `id` varchar(255) NOT NULL,
   `command` text,
   `message` text,
   `time_add_queue` int(11),
