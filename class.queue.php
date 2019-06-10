@@ -20,12 +20,6 @@ class queue_admin {
 	public $max_process = 10;
 	
 	/*
-		File DB DIR and Name
-	*/
-	
-	private $file_db = __DIR__.'/queue.sqlite3';
-	
-	/*
 		PHP_CLI
 		Example
 			cPanel: '/usr/bin/php'
@@ -59,7 +53,13 @@ class queue_admin {
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;');
 	}
 	
+	private function reconnectdb(){
+		mysqli_close($this->linkdb);
+		$this->linkdb = conectarDB();
+	}
+	
 	public function enqueue($command, $id = null){
+		if(!mysqli_ping($this->linkdb)) $this->reconnectdb();
 		if(empty($id)) $id = md5($command);
 		$id = mysqli_real_escape_string($this->linkdb,$id);
 		$command = mysqli_real_escape_string($this->linkdb,$command);
@@ -74,6 +74,7 @@ class queue_admin {
 	}
 	
 	public function run_job($id){
+		if(!mysqli_ping($this->linkdb)) $this->reconnectdb();
 		$id = mysqli_real_escape_string($this->linkdb,$id);
 		$sql = "SELECT * FROM queue WHERE id = '{$id}' and status = '1' LIMIT 1";
 		$sql = mysqli_query($this->linkdb, $sql);
@@ -87,6 +88,7 @@ class queue_admin {
 	}
 	
 	public function count_queue_processing(){
+		if(!mysqli_ping($this->linkdb)) $this->reconnectdb();
 		$sql = "SELECT count(*) as total FROM queue WHERE status = '2'";
 		$sql = mysqli_query($this->linkdb, $sql);
 		$result = mysqli_fetch_assoc($sql);
@@ -94,6 +96,7 @@ class queue_admin {
 	}
 	
 	public function count_queue_pending(){
+		if(!mysqli_ping($this->linkdb)) $this->reconnectdb();
 		$sql = "SELECT count(*) as total FROM queue WHERE status = '1'";
 		$sql = mysqli_query($this->linkdb, $sql);
 		$result = mysqli_fetch_assoc($sql);
@@ -101,6 +104,7 @@ class queue_admin {
 	}
 	
 	public function count_queue_finish(){
+		if(!mysqli_ping($this->linkdb)) $this->reconnectdb();
 		$sql = "SELECT count(*) as total FROM queue WHERE status = '3'";
 		$sql = mysqli_query($this->linkdb, $sql);
 		$result = mysqli_fetch_assoc($sql);
@@ -108,6 +112,7 @@ class queue_admin {
 	}
 	
 	public function count_queue_total(){
+		if(!mysqli_ping($this->linkdb)) $this->reconnectdb();
 		$sql = "SELECT count(*) as total FROM queue";
 		$sql = mysqli_query($this->linkdb, $sql);
 		$result = mysqli_fetch_assoc($sql);
@@ -121,6 +126,7 @@ class queue_admin {
 	}
 	
 	public function get_queue_db(){
+		if(!mysqli_ping($this->linkdb)) $this->reconnectdb();
 		$sql = "SELECT * FROM queue";
 		$sql = mysqli_query($this->linkdb, $sql);
 		$data = array();
@@ -131,6 +137,7 @@ class queue_admin {
 	}
 	
 	public function delete_process_finish(){
+		if(!mysqli_ping($this->linkdb)) $this->reconnectdb();
 		$sql = "DELETE FROM queue WHERE status = '3'";
 		$sql = mysqli_query($this->linkdb, $sql);
 	}
@@ -149,6 +156,7 @@ class queue_admin {
 	}
 	
 	private function process_next(){
+		if(!mysqli_ping($this->linkdb)) $this->reconnectdb();
 		$sql = "SELECT * FROM queue WHERE status = '1' LIMIT 1";
 		$sql = mysqli_query($this->linkdb, $sql);
 		$result = mysqli_fetch_assoc($sql);
@@ -172,6 +180,7 @@ class queue_admin {
 	}
 	
 	private function set_start_time($id){
+		if(!mysqli_ping($this->linkdb)) $this->reconnectdb();
 		$id = mysqli_real_escape_string($this->linkdb,$id);
 		$time = time();
 		$sql = "UPDATE queue SET time_start_process = '{$time}' WHERE id = '{$id}' LIMIT 1";
@@ -179,6 +188,7 @@ class queue_admin {
 	}
 	
 	private function set_finish_time($id){
+		if(!mysqli_ping($this->linkdb)) $this->reconnectdb();
 		$id = mysqli_real_escape_string($this->linkdb,$id);
 		$time = time();
 		$sql = "UPDATE queue SET time_finish_process = '{$time}' WHERE id = '{$id}' LIMIT 1";
@@ -186,6 +196,7 @@ class queue_admin {
 	}
 	
 	private function set_status($id, $status){
+		if(!mysqli_ping($this->linkdb)) $this->reconnectdb();
 		$id = mysqli_real_escape_string($this->linkdb,$id);
 		$status = mysqli_real_escape_string($this->linkdb, $status);
 		$sql = "UPDATE queue SET status = '{$status}' WHERE id = '{$id}' LIMIT 1";
@@ -193,6 +204,7 @@ class queue_admin {
 	}
 	
 	private function set_message($id, $output){
+		if(!mysqli_ping($this->linkdb)) $this->reconnectdb();
 		$id = mysqli_real_escape_string($this->linkdb,$id);
 		$output = mysqli_real_escape_string($this->linkdb, $output);
 		$sql = "UPDATE queue SET message = '{$output}' WHERE id = '{$id}' LIMIT 1";
