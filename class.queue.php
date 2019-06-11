@@ -42,15 +42,14 @@ class queue_admin {
 		//
 		$this->linkdb = conectarDB();
 		mysqli_query($this->linkdb, 'CREATE TABLE IF NOT EXISTS `queue` (
-  `id` varchar(255) NOT NULL,
+  `id` int(11) AUTO_INCREMENT PRIMARY KEY,
   `command` text,
   `message` text,
   `time_add_queue` int(11),
   `time_start_process` int(11),
   `time_finish_process` int(11),
   `time_wake_up` int(11),
-  `status` int(11),
-  UNIQUE KEY `id` (`id`)
+  `status` int(11)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;');
 	}
 	
@@ -59,19 +58,13 @@ class queue_admin {
 		$this->linkdb = conectarDB();
 	}
 	
-	public function enqueue($command, $id = null, $time_wake_up = 0){
+	public function enqueue($command, $time_wake_up = 0){
 		if(!mysqli_ping($this->linkdb)) $this->reconnectdb();
-		if(empty($id)) $id = md5($command);
-		$id = mysqli_real_escape_string($this->linkdb,$id);
-		$command = mysqli_real_escape_string($this->linkdb,$command);
-		$sql = "SELECT * FROM queue WHERE id = '{$id}' LIMIT 1";
-		$sql = mysqli_query($this->linkdb, $sql);
-		$row = mysqli_fetch_assoc($sql);
-		if(!empty($row)) return false;
 		$time = time();
-		$sql = "INSERT INTO queue (id, command, time_add_queue, time_start_process, time_finish_process, time_wake_up, status) VALUES ('{$id}', '{$command}', '{$time}', 0, 0, {$time_wake_up}, 1)";
+		$command = mysqli_real_escape_string($this->linkdb,$command);
+		$sql = "INSERT INTO queue (command, time_add_queue, time_start_process, time_finish_process, time_wake_up, status) VALUES ('{$command}', '{$time}', 0, 0, {$time_wake_up}, 1)";
 		mysqli_query($this->linkdb, $sql);
-		return $id;
+		return mysqli_insert_id($this->linkdb);
 	}
 	
 	public function run_job($id){
