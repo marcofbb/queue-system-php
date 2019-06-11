@@ -68,6 +68,7 @@ tr:nth-child(even) {
 		<th>time_add_queue</th>
 		<th>time_start_process</th>
 		<th>time_finish_process</th>
+		<th>wake_up</th>
 		<th>status</th>
 	</tr>
 <?php 
@@ -81,6 +82,7 @@ tr:nth-child(even) {
 		<td><?=$d['time_add_queue']?></td>
 		<td><?=$d['time_start_process']?></td>
 		<td><?=$d['time_finish_process']?></td>
+		<td><?=$d['time_wake_up']?></td>
 		<td><?=$d['status']?></td>
 	</tr>
 <?php endforeach; endif; ?>
