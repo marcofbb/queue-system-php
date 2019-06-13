@@ -26,7 +26,7 @@ class queue_admin {
 			xampp Windows: 'C:\xampp\php\php.exe'
 			vestacp: 'php'
 	*/
-	private $php_cli = 'C:\xampp\php\php.exe';
+	private $php_cli = 'php';
 	
 	/*
 		File responsible for processing the command

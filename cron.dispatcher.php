@@ -16,5 +16,5 @@ $cola = new queue_admin();
 
 while(true){
 	$cola->process_queue();
-	sleep(1);
+	sleep(2);
 }
