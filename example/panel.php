@@ -5,11 +5,13 @@ $cola = new queue_admin();
 
 if(isset($_GET['do']) and !empty($_GET['do'])){
 	$do = $_GET['do'];
-	$id_job = time().rand(0,1000);
 	if($do == 'add-demo-process1'){
-		$cola->enqueue('C:\xampp\php\php.exe '.__DIR__.'/exec/write_time_in_txt.php', $id_job);
+		$cola->enqueue('C:\xampp\php\php.exe '.__DIR__.'/exec/write_time_in_txt.php');
 	} elseif($do == 'add-demo-process2'){
-		$cola->enqueue('C:\xampp\php\php.exe '.__DIR__.'/exec/wait_30s.php', $id_job);
+		$cola->enqueue('C:\xampp\php\php.exe '.__DIR__.'/exec/wait_30s.php');
+	} elseif($do == 'add-demo-process3'){
+		$in_20_second = time() + 20;
+		$cola->enqueue('C:\xampp\php\php.exe '.__DIR__.'/exec/wait_30s.php',$in_20_second);
 	} elseif($do == 'exec-one-queue') {
 		$cola->process_queue();
 	} elseif($do == 'delete-all-process-finish'){
@@ -45,6 +47,7 @@ tr:nth-child(even) {
 <ul>
 	<li><a href="?do=add-demo-process1">Add Demo Process [Write txt]</a></li>
 	<li><a href="?do=add-demo-process2">Add Demo Process [Wait 30s]</a></li>
+	<li><a href="?do=add-demo-process3">Add Demo Process [Write txt] in 20 seconds</a></li>
 	<li><a href="?do=exec-one-queue">Execute a single process from the queue</a></li>
 	<li><a href="?do=delete-all-process-finish">Delete all process finish</a></li>
 </ul>
