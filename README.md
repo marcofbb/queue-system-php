@@ -32,6 +32,11 @@ You must configure the maximum number of processes in parallel in class.queue.ph
 public $max_process = 10;
 ```
 
+### Cronjob
+Add cron with execute PHP cron.dispatcher.php every two minutes.
+```
+php /path/cron.dispatcher.php
+```
 
 # Sistema liviano de colas PHP
 Sistema de colas liviano que realiza el trabajo en segundo plano, con un agente central que se encarga de ejecutar y administrar los procesos. 
@@ -65,4 +70,10 @@ Se debe configurar la cantidad máxima de procesos en paralelos en class.queue.p
 */
 	
 public $max_process = 10;
+```
+
+### Cronjob
+Agregar un cronjob para ejecutar el archivo cron.dispatcher.php cada dos minutos
+```
+php /path/cron.dispatcher.php
 ```
