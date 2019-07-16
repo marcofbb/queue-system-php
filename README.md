@@ -33,9 +33,9 @@ public $max_process = 10;
 ```
 
 ### Cronjob
-Add cron with execute PHP cron.dispatcher.php every two minutes.
+Add cron with execute PHP cron.dispatcher.php every five minutes.
 ```
-php /path/cron.dispatcher.php
+*/5 * * * * /usr/bin/php /home/username/public_html/cron.dispatcher.php >/dev/null 2>&1
 ```
 
 # Sistema liviano de colas PHP
@@ -73,7 +73,7 @@ public $max_process = 10;
 ```
 
 ### Cronjob
-Agregar un cronjob para ejecutar el archivo cron.dispatcher.php cada dos minutos
+Agregar un cronjob para ejecutar el archivo cron.dispatcher.php cada cinco minutos
 ```
-php /path/cron.dispatcher.php
+*/5 * * * * /usr/bin/php /home/username/public_html/cron.dispatcher.php >/dev/null 2>&1
 ```
