@@ -58,6 +58,7 @@ tr:nth-child(even) {
 	<li>Pending: <?php echo $cola->count_queue_pending(); ?></li>
 	<li>Processing: <?php echo $cola->count_queue_processing(); ?></li>
 	<li>Finish: <?php echo $cola->count_queue_finish(); ?></li>
+	<li>Maximum in parallel [Config]: <?php echo $cola->max_process; ?></li>
 	<li>Total: <?php echo $cola->count_queue_total(); ?></li>
 </ul>
 
