@@ -4,7 +4,7 @@ function conectarDB(){
 	$dbhost = 'localhost';
 	$dbuser = 'root';
 	$dbpass = '';
-	$dbbase = 'p2pdrive';
+	$dbbase = 'dbqueue';
 	$link = mysqli_connect($dbhost,$dbuser,$dbpass);
 			mysqli_select_db($link,$dbbase);
 			
@@ -45,6 +45,7 @@ class queue_admin {
   `id` int(11) AUTO_INCREMENT PRIMARY KEY,
   `command` text,
   `message` text,
+  `priority` int(5),
   `time_add_queue` int(11),
   `time_start_process` int(11),
   `time_finish_process` int(11),
@@ -58,11 +59,11 @@ class queue_admin {
 		$this->linkdb = conectarDB();
 	}
 	
-	public function enqueue($command, $time_wake_up = 0){
+	public function enqueue($command, $time_wake_up = 0, $priority = 10){
 		if(!mysqli_ping($this->linkdb)) $this->reconnectdb();
 		$time = time();
 		$command = mysqli_real_escape_string($this->linkdb,$command);
-		$sql = "INSERT INTO queue (command, time_add_queue, time_start_process, time_finish_process, time_wake_up, status) VALUES ('{$command}', '{$time}', 0, 0, {$time_wake_up}, 1)";
+		$sql = "INSERT INTO queue (command, message, priority, time_add_queue, time_start_process, time_finish_process, time_wake_up, status) VALUES ('{$command}', '', '{$priority}', '{$time}', 0, 0, '{$time_wake_up}', 1)";
 		mysqli_query($this->linkdb, $sql);
 		return mysqli_insert_id($this->linkdb);
 	}
@@ -121,7 +122,7 @@ class queue_admin {
 	
 	public function get_queue_db(){
 		if(!mysqli_ping($this->linkdb)) $this->reconnectdb();
-		$sql = "SELECT * FROM queue";
+		$sql = "SELECT * FROM queue ORDER BY status DESC, priority ASC, id ASC";
 		$sql = mysqli_query($this->linkdb, $sql);
 		$data = array();
 		while($row = mysqli_fetch_assoc($sql)){
@@ -152,7 +153,7 @@ class queue_admin {
 	private function process_next(){
 		if(!mysqli_ping($this->linkdb)) $this->reconnectdb();
 		$time = time();
-		$sql = "SELECT * FROM queue WHERE status = '1' and time_wake_up <= '{$time}' LIMIT 1";
+		$sql = "SELECT * FROM queue WHERE status = '1' and time_wake_up <= '{$time}' ORDER BY priority ASC, id ASC LIMIT 1";
 		$sql = mysqli_query($this->linkdb, $sql);
 		$result = mysqli_fetch_assoc($sql);
 		if(empty($result)) return;

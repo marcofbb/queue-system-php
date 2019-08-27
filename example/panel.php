@@ -11,7 +11,7 @@ if(isset($_GET['do']) and !empty($_GET['do'])){
 		$cola->enqueue('C:\xampp\php\php.exe '.__DIR__.'/exec/wait_30s.php');
 	} elseif($do == 'add-demo-process3'){
 		$in_20_second = time() + 20;
-		$cola->enqueue('C:\xampp\php\php.exe '.__DIR__.'/exec/wait_30s.php',$in_20_second);
+		$cola->enqueue('C:\xampp\php\php.exe '.__DIR__.'/exec/wait_30s.php',$in_20_second,1);
 	} elseif($do == 'exec-one-queue') {
 		$cola->process_queue();
 	} elseif($do == 'delete-all-process-finish'){
@@ -47,7 +47,7 @@ tr:nth-child(even) {
 <ul>
 	<li><a href="?do=add-demo-process1">Add Demo Process [Write txt]</a></li>
 	<li><a href="?do=add-demo-process2">Add Demo Process [Wait 30s]</a></li>
-	<li><a href="?do=add-demo-process3">Add Demo Process [Write txt] in 20 seconds</a></li>
+	<li><a href="?do=add-demo-process3">Add Demo Process [Write txt] in 20 seconds and max priority</a></li>
 	<li><a href="?do=exec-one-queue">Execute a single process from the queue</a></li>
 	<li><a href="?do=delete-all-process-finish">Delete all process finish</a></li>
 </ul>
@@ -68,6 +68,7 @@ tr:nth-child(even) {
 	<tr>
 		<th>ID</th>
 		<th>command</th>
+		<th>priority</th>
 		<th>message</th>
 		<th>time_add_queue</th>
 		<th>time_start_process</th>
@@ -82,6 +83,7 @@ tr:nth-child(even) {
 	<tr>
 		<td><?=$d['id']?></td>
 		<td><small><?=$d['command']?></small></td>
+		<td><?=$d['priority']?></td>
 		<td><small><?=$d['message']?></small></td>
 		<td><?=$d['time_add_queue']?></td>
 		<td><?=$d['time_start_process']?></td>
