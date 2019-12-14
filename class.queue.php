@@ -71,7 +71,7 @@ class queue_admin {
 	public function run_job($id){
 		if(!mysqli_ping($this->linkdb)) $this->reconnectdb();
 		$id = mysqli_real_escape_string($this->linkdb,$id);
-		$sql = "SELECT * FROM queue WHERE id = '{$id}' and status = '1' LIMIT 1";
+		$sql = "SELECT * FROM queue WHERE id = '{$id}' and (status = '1' or status = '4') LIMIT 1";
 		$sql = mysqli_query($this->linkdb, $sql);
 		$result = mysqli_fetch_assoc($sql);
 		if(empty($result)) return false;
@@ -157,6 +157,7 @@ class queue_admin {
 		$sql = mysqli_query($this->linkdb, $sql);
 		$result = mysqli_fetch_assoc($sql);
 		if(empty($result)) return;
+		$this->mark_as_pre_process($result['id']);
 		$this->process_job($result['id']);
 	}
 	
@@ -168,6 +169,10 @@ class queue_admin {
 	private function mark_as_process($id){
 		$this->set_status($id,2);
 		$this->set_start_time($id);
+	}
+	
+	private function mark_as_pre_process($id){
+		$this->set_status($id,4);
 	}
 	
 	private function mark_as_finish($id){
