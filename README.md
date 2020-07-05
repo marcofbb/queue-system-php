@@ -38,6 +38,9 @@ Add cron with execute PHP cron.dispatcher.php every five minutes.
 */5 * * * * /usr/bin/php /home/username/public_html/cron.dispatcher.php >/dev/null 2>&1
 ```
 
+### Interesting
+If you want a more advanced system, you may be interested in this other system called beanstalkd https://beanstalkd.github.io/
+
 # Sistema liviano de colas PHP
 Sistema de colas liviano que realiza el trabajo en segundo plano, con un agente central que se encarga de ejecutar y administrar los procesos. 
 
@@ -77,3 +80,6 @@ Agregar un cronjob para ejecutar el archivo cron.dispatcher.php cada cinco minut
 ```
 */5 * * * * /usr/bin/php /home/username/public_html/cron.dispatcher.php >/dev/null 2>&1
 ```
+
+### Interesante
+Si desea un sistema mas avanzado, puede ser de tu interes beanstalkd https://beanstalkd.github.io/
